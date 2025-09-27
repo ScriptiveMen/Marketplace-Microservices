@@ -7,18 +7,17 @@ const imagekit = new ImageKit({
     urlEndpoint: process.env.IMAGEKIT_URL_ENDPOINT,
 });
 
-async function uploadFile({ fileBuffer, folder = "/products" }) {
-    const resp = await imagekit.upload({
-        file: fileBuffer,
+async function uploadImage({ buffer, folder = "/products" }) {
+    const res = await imagekit.upload({
+        file: buffer,
         fileName: uuidv4(),
         folder,
     });
-
     return {
-        url: resp.url,
-        thumbnail: resp.thumbnailUrl || resp.url,
-        id: resp.fileId,
+        url: res.url,
+        thumbnail: res.thumbnailUrl || res.url,
+        id: res.fileId,
     };
 }
 
-module.exports = { uploadFile };
+module.exports = { imagekit, uploadImage };

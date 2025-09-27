@@ -1,5 +1,5 @@
-const { uploadFile } = require("../services/imagekit.service");
 const productModel = require("../models/product.model");
+const { uploadImage } = require("../services/imagekit.service");
 
 async function createProduct(req, res) {
     try {
@@ -10,40 +10,37 @@ async function createProduct(req, res) {
             priceCurrency = "INR",
         } = req.body;
 
-        // Fixed: Check for priceAmount instead of price
-        if (!title || !priceAmount) {
-            return res
-                .status(400)
-                .json({ message: "title and priceAmount are required" });
-        }
-
         const seller = req.user.id;
-        let images = [];
-
-        // Fixed: Handle file uploads properly
-
-        if (req.files && req.files.length > 0) {
-            const uploadPromises = req.files.map((file) =>
-                uploadFile({ fileBuffer: file.buffer })
-            );
-            images = await Promise.all(uploadPromises);
-        }
 
         const price = {
             amount: Number(priceAmount),
             currency: priceCurrency,
         };
 
-        // Fixed: Use only the database model, remove in-memory array
+        if (!title || !priceAmount) {
+            return res
+                .status(400)
+                .json({ message: "title and priceAmount are required" });
+        }
+
+        const images = await Promise.all(
+            (req.files || []).map((file) =>
+                uploadImage({ buffer: file.buffer })
+            )
+        );
+
         const product = await productModel.create({
             title,
             description,
             price,
             seller,
-            images,
+            images: images,
         });
 
-        res.status(201).json(product);
+        res.status(201).json({
+            message: "Product Created",
+            data: product,
+        });
     } catch (err) {
         console.error(err);
         res.status(500).json({ message: "internal error" });
