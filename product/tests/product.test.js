@@ -3,7 +3,7 @@ const app = require("../src/app");
 
 // Mock ImageKit service
 jest.mock("../src/services/imagekit.service", () => ({
-    uploadFile: jest.fn(),
+    uploadImage: jest.fn(), // Changed from uploadFile to uploadImage
 }));
 
 // Mock the entire auth middleware file
@@ -26,12 +26,12 @@ jest.mock("../src/models/product.model", () => ({
     create: jest.fn(),
 }));
 
-const { uploadFile } = require("../src/services/imagekit.service");
+const { uploadImage } = require("../src/services/imagekit.service"); // Changed from uploadFile
 const productModel = require("../src/models/product.model");
 
 describe("POST /api/products", () => {
     beforeEach(() => {
-        uploadFile.mockReset();
+        uploadImage.mockReset(); // Changed from uploadFile
         productModel.create.mockReset();
     });
 
@@ -54,10 +54,11 @@ describe("POST /api/products", () => {
             .field("priceCurrency", "INR");
 
         expect(res.statusCode).toBe(201);
-        expect(res.body).toHaveProperty("id");
-        expect(res.body.title).toBe("Test Product");
-        expect(res.body.price.amount).toBe(1000);
-        expect(res.body.price.currency).toBe("INR");
+        expect(res.body.data).toHaveProperty("id"); // Fixed: access via data property
+        expect(res.body.data.title).toBe("Test Product"); // Fixed: access via data property
+        expect(res.body.data.price.amount).toBe(1000); // Fixed: access via data property
+        expect(res.body.data.price.currency).toBe("INR"); // Fixed: access via data property
+        expect(res.body.message).toBe("Product Created"); // Added message check
         expect(productModel.create).toHaveBeenCalledWith({
             title: "Test Product",
             description: "A test product",
@@ -68,8 +69,8 @@ describe("POST /api/products", () => {
     });
 
     test("uploads image successfully", async () => {
-        // Mock uploadFile response
-        uploadFile.mockResolvedValue({
+        // Mock uploadImage response (changed from uploadFile)
+        uploadImage.mockResolvedValue({
             url: "https://example.com/image.jpg",
             thumbnail: "https://example.com/thumb.jpg",
             id: "abc123",
@@ -95,17 +96,20 @@ describe("POST /api/products", () => {
             .post("/api/products")
             .field("title", "Product with Image")
             .field("priceAmount", "500")
-            .attach("image", buffer, {
+            .attach("images", buffer, {
+                // Changed from "image" to "images" to match route
                 filename: "test.jpg",
                 contentType: "image/jpeg",
             });
 
         expect(res.statusCode).toBe(201);
-        expect(uploadFile).toHaveBeenCalledWith({
-            fileBuffer: expect.any(Buffer),
+        expect(uploadImage).toHaveBeenCalledWith({
+            // Changed from uploadFile
+            buffer: expect.any(Buffer), // Changed from fileBuffer to buffer
         });
-        expect(res.body.images).toHaveLength(1);
-        expect(res.body.images[0]).toMatchObject({
+        expect(res.body.data.images).toHaveLength(1); // Fixed: access via data property
+        expect(res.body.data.images[0]).toMatchObject({
+            // Fixed: access via data property
             url: "https://example.com/image.jpg",
             thumbnail: "https://example.com/thumb.jpg",
             id: "abc123",
