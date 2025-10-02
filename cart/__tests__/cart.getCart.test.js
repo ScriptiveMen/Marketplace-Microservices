@@ -13,8 +13,9 @@ describe("GET /api/cart", () => {
 
     beforeAll(() => {
         process.env.JWT_SECRET_KEY = "test-secret-key";
+        // CHANGED: Use 'id' instead of '_id' to match your auth middleware
         validToken = jwt.sign(
-            { _id: userId, role: "user" },
+            { id: userId.toString(), role: "user" },
             process.env.JWT_SECRET_KEY
         );
     });
@@ -26,7 +27,6 @@ describe("GET /api/cart", () => {
     describe("Authentication Tests", () => {
         test("should return 401 when no token is provided", async () => {
             const response = await request(app).get("/api/cart");
-
             expect(response.status).toBe(401);
             expect(response.body.message).toBe(
                 "Unauthorized, No token provided"
@@ -37,21 +37,19 @@ describe("GET /api/cart", () => {
             const response = await request(app)
                 .get("/api/cart")
                 .set("Authorization", "Bearer invalid-token");
-
             expect(response.status).toBe(401);
             expect(response.body.message).toBe("Unauthorized: Invalid token");
         });
 
         test("should return 403 when user has insufficient permissions", async () => {
+            // CHANGED: Use 'id' instead of '_id'
             const adminToken = jwt.sign(
-                { _id: userId, role: "admin" },
+                { id: userId.toString(), role: "admin" },
                 process.env.JWT_SECRET_KEY
             );
-
             const response = await request(app)
                 .get("/api/cart")
                 .set("Authorization", `Bearer ${adminToken}`);
-
             expect(response.status).toBe(403);
             expect(response.body.message).toBe(
                 "Forbidden: Insufficient permission"
@@ -63,13 +61,10 @@ describe("GET /api/cart", () => {
                 user: userId,
                 items: [],
             };
-
             cartModel.findOne.mockResolvedValue(mockCart);
-
             const response = await request(app)
                 .get("/api/cart")
                 .set("Cookie", `token=${validToken}`);
-
             expect(response.status).toBe(200);
         });
 
@@ -78,13 +73,10 @@ describe("GET /api/cart", () => {
                 user: userId,
                 items: [],
             };
-
             cartModel.findOne.mockResolvedValue(mockCart);
-
             const response = await request(app)
                 .get("/api/cart")
                 .set("Authorization", `Bearer ${validToken}`);
-
             expect(response.status).toBe(200);
         });
     });
@@ -98,7 +90,6 @@ describe("GET /api/cart", () => {
                 items: [],
                 save: mockSave,
             };
-
             cartModel.findOne.mockResolvedValue(null);
             cartModel.mockImplementation(() => newCart);
 
@@ -123,7 +114,6 @@ describe("GET /api/cart", () => {
                     },
                 ],
             };
-
             cartModel.findOne.mockResolvedValue(mockCart);
 
             const response = await request(app)
@@ -141,7 +131,6 @@ describe("GET /api/cart", () => {
                 user: userId,
                 items: [],
             };
-
             cartModel.findOne.mockResolvedValue(mockCart);
 
             const response = await request(app)
@@ -165,7 +154,6 @@ describe("GET /api/cart", () => {
                     },
                 ],
             };
-
             cartModel.findOne.mockResolvedValue(mockCart);
 
             const response = await request(app)
@@ -196,7 +184,6 @@ describe("GET /api/cart", () => {
                     },
                 ],
             };
-
             cartModel.findOne.mockResolvedValue(mockCart);
 
             const response = await request(app)
@@ -227,7 +214,6 @@ describe("GET /api/cart", () => {
                     },
                 ],
             };
-
             cartModel.findOne.mockResolvedValue(mockCart);
 
             const response = await request(app)
@@ -239,19 +225,19 @@ describe("GET /api/cart", () => {
             expect(response.body.totals.totalQuantity).toBe(850); // 100 + 500 + 250
         });
 
-        test("should query cart using user._id from token", async () => {
+        test("should query cart using user.id from token", async () => {
             const mockCart = {
                 _id: new mongoose.Types.ObjectId(),
                 user: userId,
                 items: [],
             };
-
             cartModel.findOne.mockResolvedValue(mockCart);
 
             await request(app)
                 .get("/api/cart")
                 .set("Authorization", `Bearer ${validToken}`);
 
+            // CHANGED: Expect user.id (string) instead of user._id
             expect(cartModel.findOne).toHaveBeenCalledWith({
                 user: userId.toString(),
             });
@@ -270,7 +256,6 @@ describe("GET /api/cart", () => {
                     },
                 ],
             };
-
             cartModel.findOne.mockResolvedValue(mockCart);
 
             const response = await request(app)
@@ -291,7 +276,6 @@ describe("GET /api/cart", () => {
                 user: userId,
                 items: [],
             };
-
             cartModel.findOne.mockResolvedValue(mockCart);
 
             const response = await request(app)
@@ -318,7 +302,6 @@ describe("GET /api/cart", () => {
                     },
                 ],
             };
-
             cartModel.findOne.mockResolvedValue(mockCart);
 
             const response = await request(app)
@@ -340,7 +323,6 @@ describe("GET /api/cart", () => {
                 items: [],
                 save: mockSave,
             };
-
             cartModel.findOne.mockResolvedValue(null);
             cartModel.mockImplementation(() => newCart);
 
@@ -348,6 +330,7 @@ describe("GET /api/cart", () => {
                 .get("/api/cart")
                 .set("Authorization", `Bearer ${validToken}`);
 
+            // CHANGED: Expect user.id (string) instead of user._id
             expect(cartModel).toHaveBeenCalledWith({
                 user: userId.toString(),
                 items: [],
@@ -367,7 +350,6 @@ describe("GET /api/cart", () => {
                     },
                 ],
             };
-
             cartModel.findOne.mockResolvedValue(mockCart);
 
             await request(app)
@@ -391,7 +373,6 @@ describe("GET /api/cart", () => {
                     },
                 ],
             };
-
             cartModel.findOne.mockResolvedValue(mockCart);
 
             const response = await request(app)
@@ -408,13 +389,11 @@ describe("GET /api/cart", () => {
                 productId: new mongoose.Types.ObjectId(),
                 quantity: 1,
             }));
-
             const mockCart = {
                 _id: new mongoose.Types.ObjectId(),
                 user: userId,
                 items: items,
             };
-
             cartModel.findOne.mockResolvedValue(mockCart);
 
             const response = await request(app)
@@ -449,7 +428,6 @@ describe("GET /api/cart", () => {
                     },
                 ],
             };
-
             cartModel.findOne.mockResolvedValue(mockCart);
 
             const response = await request(app)
@@ -465,11 +443,11 @@ describe("GET /api/cart", () => {
     describe("Integration with User Authentication", () => {
         test("should return cart specific to authenticated user", async () => {
             const user1Id = new mongoose.Types.ObjectId();
+            // CHANGED: Use 'id' instead of '_id'
             const token1 = jwt.sign(
-                { _id: user1Id, role: "user" },
+                { id: user1Id.toString(), role: "user" },
                 process.env.JWT_SECRET_KEY
             );
-
             const mockCart = {
                 _id: new mongoose.Types.ObjectId(),
                 user: user1Id,
@@ -480,13 +458,13 @@ describe("GET /api/cart", () => {
                     },
                 ],
             };
-
             cartModel.findOne.mockResolvedValue(mockCart);
 
             await request(app)
                 .get("/api/cart")
                 .set("Authorization", `Bearer ${token1}`);
 
+            // CHANGED: Expect user.id (string)
             expect(cartModel.findOne).toHaveBeenCalledWith({
                 user: user1Id.toString(),
             });
@@ -494,11 +472,11 @@ describe("GET /api/cart", () => {
 
         test("should create cart for new user on first access", async () => {
             const newUserId = new mongoose.Types.ObjectId();
+            // CHANGED: Use 'id' instead of '_id'
             const newUserToken = jwt.sign(
-                { _id: newUserId, role: "user" },
+                { id: newUserId.toString(), role: "user" },
                 process.env.JWT_SECRET_KEY
             );
-
             const mockSave = jest.fn().mockResolvedValue(true);
             const newCart = {
                 _id: new mongoose.Types.ObjectId(),
@@ -506,7 +484,6 @@ describe("GET /api/cart", () => {
                 items: [],
                 save: mockSave,
             };
-
             cartModel.findOne.mockResolvedValue(null);
             cartModel.mockImplementation(() => newCart);
 
@@ -515,6 +492,7 @@ describe("GET /api/cart", () => {
                 .set("Authorization", `Bearer ${newUserToken}`);
 
             expect(response.status).toBe(200);
+            // CHANGED: Expect user.id (string)
             expect(cartModel).toHaveBeenCalledWith({
                 user: newUserId.toString(),
                 items: [],

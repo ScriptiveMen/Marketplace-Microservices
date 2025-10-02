@@ -7,7 +7,7 @@ const imagekit = new ImageKit({
     urlEndpoint: process.env.IMAGEKIT_URL_ENDPOINT,
 });
 
-async function uploadImage({ buffer, folder = "/products" }) {
+async function uploadImage({ buffer, folder = "/Nexora-products" }) {
     const res = await imagekit.upload({
         file: buffer,
         fileName: uuidv4(),

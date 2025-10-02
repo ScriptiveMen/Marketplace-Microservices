@@ -3,12 +3,12 @@ const cartModel = require("../model/cart.model");
 async function getCart(req, res) {
     try {
         const user = req.user;
-        const cart = await cartModel.findOne({ user: user._id });
+        // Use user.id consistently (from JWT token)
+        const cart = await cartModel.findOne({ user: user.id });
 
         if (!cart) {
-            const newCart = new cartModel({ user: user._id, items: [] });
+            const newCart = new cartModel({ user: user.id, items: [] });
             await newCart.save();
-
             return res.status(200).json({
                 cart: newCart,
                 totals: {
@@ -24,7 +24,7 @@ async function getCart(req, res) {
                 itemCount: cart.items.length,
                 totalQuantity: cart.items.reduce(
                     (sum, item) => sum + item.quantity,
-                    0 // Added initial value
+                    0
                 ),
             },
         });
@@ -37,13 +37,13 @@ async function getCart(req, res) {
 
 async function addItemToCart(req, res) {
     const { productId, qty } = req.body;
-
     const user = req.user;
 
-    let cart = await cartModel.findOne({ user: user._id });
+    // Use user.id consistently
+    let cart = await cartModel.findOne({ user: user.id });
 
     if (!cart) {
-        cart = new cartModel({ user: user._id, items: [] });
+        cart = new cartModel({ user: user.id, items: [] });
     }
 
     const existingItemIndex = cart.items.findIndex(
@@ -69,7 +69,8 @@ async function updateItemQuantity(req, res) {
         const { qty } = req.body;
         const user = req.user;
 
-        const cart = await cartModel.findOne({ user: user._id });
+        // Use user.id consistently
+        const cart = await cartModel.findOne({ user: user.id });
 
         if (!cart) {
             return res.status(404).json({ message: "Cart not found" });
@@ -87,7 +88,6 @@ async function updateItemQuantity(req, res) {
 
         cart.items[itemIndex].quantity = qty;
         await cart.save();
-
         res.status(200).json({ message: "Cart item updated", cart });
     } catch (error) {
         res.status(500).json({ message: "Server error" });

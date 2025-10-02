@@ -15,8 +15,9 @@ describe("POST /api/cart/items", () => {
 
     beforeAll(() => {
         process.env.JWT_SECRET_KEY = "test-secret-key";
+        // CHANGED: Use 'id' instead of '_id'
         validToken = jwt.sign(
-            { _id: userId, role: "user" },
+            { id: userId.toString(), role: "user" },
             process.env.JWT_SECRET_KEY
         );
     });
@@ -48,8 +49,9 @@ describe("POST /api/cart/items", () => {
         });
 
         test("should return 403 when user has insufficient permissions", async () => {
+            // CHANGED: Use 'id' instead of '_id'
             const adminToken = jwt.sign(
-                { _id: userId, role: "admin" },
+                { id: userId.toString(), role: "admin" },
                 process.env.JWT_SECRET_KEY
             );
 
@@ -207,7 +209,6 @@ describe("POST /api/cart/items", () => {
                 ],
                 save: mockSave,
             };
-
             cartModel.findOne.mockResolvedValue(existingCart);
 
             const response = await request(app)
@@ -233,7 +234,6 @@ describe("POST /api/cart/items", () => {
                 ],
                 save: mockSave,
             };
-
             cartModel.findOne.mockResolvedValue(existingCart);
 
             const response = await request(app)
@@ -259,7 +259,6 @@ describe("POST /api/cart/items", () => {
                 ],
                 save: mockSave,
             };
-
             cartModel.findOne.mockResolvedValue(existingCart);
 
             const response = await request(app)
@@ -346,7 +345,6 @@ describe("POST /api/cart/items", () => {
                 ],
                 save: mockSave,
             };
-
             cartModel.findOne.mockResolvedValue(existingCart);
 
             const response = await request(app)
