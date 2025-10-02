@@ -48,6 +48,42 @@ const createOrderValidation = [
     respondWithValidationErrors,
 ];
 
+const updateAddressValidation = [
+    body("shippingAddress.street")
+        .isString()
+        .withMessage("Street must be a string")
+        .notEmpty()
+        .withMessage("Street is required"),
+
+    body("shippingAddress.city")
+        .isString()
+        .withMessage("City must be a string")
+        .notEmpty()
+        .withMessage("City is required"),
+
+    body("shippingAddress.state")
+        .isString()
+        .withMessage("State must be a string")
+        .notEmpty()
+        .withMessage("State is required"),
+    body("shippingAddress.country")
+        .isString()
+        .withMessage("Country must be a string")
+        .notEmpty()
+        .withMessage("Country is required"),
+    body("shippingAddress.pincode")
+        .isString()
+        .withMessage("Pincode must be a string")
+        .notEmpty()
+        .withMessage("Pincode is required")
+        .bail()
+        .matches(/^\d{6}$/) // Exactly 6 digits for Indian pincode
+        .withMessage("Pincode must be exactly 6 digits"),
+
+    respondWithValidationErrors,
+];
+
 module.exports = {
     createOrderValidation,
+    updateAddressValidation,
 };
