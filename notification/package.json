@@ -1,5 +1,5 @@
 {
-    "name": "payment",
+    "name": "notification",
     "version": "1.0.0",
     "description": "",
     "main": "index.js",
@@ -14,12 +14,9 @@
     "type": "commonjs",
     "dependencies": {
         "amqplib": "^0.10.9",
-        "axios": "^1.12.2",
-        "cookie-parser": "^1.4.7",
         "dotenv": "^17.2.3",
         "express": "^5.1.0",
-        "jsonwebtoken": "^9.0.2",
         "mongoose": "^8.19.0",
-        "razorpay": "^2.9.6"
+        "nodemailer": "^7.0.6"
     }
 }
