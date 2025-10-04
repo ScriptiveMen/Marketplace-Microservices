@@ -1,6 +1,6 @@
 const express = require("express");
 const cookieParser = require("cookie-parser");
-const orderRoutes = require("./routes/order.routes");
+const sellerRoutes = require("./routes/seller.routes");
 
 const app = express();
 
@@ -9,10 +9,10 @@ app.use(cookieParser());
 
 app.get("/", (req, res) => {
     res.status(200).json({
-        message: "Order service is running",
+        message: "Seller Dashboard service is running",
     });
 });
 
-app.use("/api/orders", orderRoutes);
+app.use("/api/seller/dashboard", sellerRoutes);
 
 module.exports = app;

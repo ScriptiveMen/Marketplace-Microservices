@@ -39,6 +39,19 @@ async function createPayment(req, res) {
             },
         });
 
+        await publishToQueue(
+            "PAYMENT_SELLER_DASHBOARD.PAYMENT_CREATED",
+            payment
+        );
+
+        await publishToQueue("PAYMENT_NOTIFICATION.PAYMENT_INITIATED", {
+            email: req.user.email,
+            username: req.user.username,
+            orderId: orderId,
+            amount: price.amount / 100,
+            currency: price.currency,
+        });
+
         res.status(201).json({ message: "Payment initiated", payment });
     } catch (err) {
         res.status(500).json({ message: "Internal server error" });
@@ -91,6 +104,11 @@ async function verifyPayment(req, res) {
             amount: payment.price.amount / 100,
             currency: payment.price.currency,
         });
+
+        await publishToQueue(
+            "PAYMENT_SELLER_DASHBOARD.PAYMENT_UPDATED",
+            payment
+        );
 
         res.staus(200).json({
             message: "Payment verified sucessfully",
